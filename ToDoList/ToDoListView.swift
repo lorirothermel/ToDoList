@@ -8,35 +8,46 @@
 import SwiftUI
 
 struct ToDoListView: View {
+    @EnvironmentObject var toDosVM: ToDosViewModel
     @State private var sheetIsPresented = false
-    
-    
-    var toDos = [
-                    "Learn Swift",
-                    "Build Apps",
-                    "Change the World",
-                    "Bring the Awesome",
-                    "Take a Vacation"
-                ]
-    
     
     
     var body: some View {
         NavigationStack {
             List {
-                ForEach(toDos, id: \.self) { toDo in
-                    NavigationLink {
-                        DetailView(passedValue: toDo)
-                    } label: {
-                        Text(toDo)
-                    }  // NavigationLink
+                ForEach(toDosVM.toDos) { toDo in
+                    HStack {
+                        NavigationLink {
+                            DetailView(toDo: toDo)
+                        } label: {
+                            Image(systemName: toDo.isCompleted ? "checkmark.rectangle" : "rectangle")
+                                .onTapGesture {
+                                    toDosVM.toggleCompleted(toDo: toDo)
+                                }
+                            Text(toDo.item)
+                        }  // NavigationLink
+                    }  // HStack
                     .font(.title2)
                 }  // ForEach
+                // Shorthand calls to onDelete & onMove
+                .onDelete(perform: toDosVM.deleteToDo)
+                .onMove(perform: toDosVM.moveToDo)
+                
+                // Traditional Calls
+                //                .onDelete { indexSet in
+                //                    toDosVM.delete(indexSet: indexSet)
+                //                }  // onDelete
+                //                .onMove { fromOffsets, toOffset in
+                //                    toDosVM.move(fromOffsets: fromOffsets, toOffset: toOffset)
+                //                }  // onMove
             }  // List
             .navigationTitle("ToDo List")
             .navigationBarTitleDisplayMode(.automatic)
             .listStyle(.plain)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    EditButton()
+                }  // ToolbarItem - Edit
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         sheetIsPresented.toggle()
@@ -47,7 +58,7 @@ struct ToDoListView: View {
             }  // toolbar
             .sheet(isPresented: $sheetIsPresented) {
                 NavigationStack {
-                    DetailView(passedValue: "")
+                    DetailView(toDo: ToDo())  // New Value
                 }  // NavigationStack
             }  // sheet
         }  // NavigationStack
@@ -57,6 +68,7 @@ struct ToDoListView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ToDoListView()
+            .environmentObject(ToDosViewModel())
     }
 }
 
