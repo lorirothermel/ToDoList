@@ -8,8 +8,33 @@
 import SwiftUI
 
 struct DetailView: View {
+    @Environment(\.dismiss) private var dismiss
+    
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+            Image(systemName: "swift")
+                .resizable()
+                .scaledToFit()
+                .foregroundStyle(.orange)
+            
+            Text("You Are A Swifty Legend!!!")
+                .font(.largeTitle)
+                .fontWeight(.semibold)
+                .multilineTextAlignment(.center)
+            
+            Spacer()
+            
+            Button("Backwards") {
+                dismiss()
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.red)
+            .foregroundColor(.white)
+            
+        }  // VStack
+        .padding()
+        
     }
 }
 
