@@ -47,7 +47,9 @@ struct ToDoListView: View {
                 }  // ToolbarItem - plus sign
             }  // .toolbar
             .sheet(isPresented: $sheetIsPresented) {
-                DetailView(passedValue: "")
+                NavigationStack {
+                    DetailView(passedValue: "")
+                }  // NavigationStack
             }  // .sheet
 //            .fullScreenCover(isPresented: $sheetIsPresented) {
 //                DetailView(passedValue: "")
