@@ -12,6 +12,7 @@ class ToDosViewModel: ObservableObject {
     @Published var toDos: [ToDo] = []
         
     init() {
+//        purgeData()
         loadData()
     }  // init
         
@@ -66,6 +67,19 @@ class ToDosViewModel: ObservableObject {
         }  // do catch
         
     }  // func loadData
+    
+    
+    func purgeData() {
+        let path = URL.documentsDirectory.appending(component: "toDos")
+        let data = try? JSONEncoder().encode("")
+        
+        do {
+            try data?.write(to: path)
+        } catch {
+            print("🤬 ERROR: Could not purge data \(error.localizedDescription)")
+        }  // do catch
+            
+    }  // func purgeData
     
     
     
