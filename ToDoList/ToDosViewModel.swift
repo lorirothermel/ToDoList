@@ -27,7 +27,17 @@ class ToDosViewModel: ObservableObject {
                 toDos[index] = toDo
             }  // if
         }  // if else
-    }
+    }  // func saveToDo
+    
+    
+    func delete(indexSet: IndexSet) {
+        toDos.remove(atOffsets: indexSet)
+    }  // func Delete
+    
+    
+    func move(fromOffsets: IndexSet, toOffset: Int) {
+        toDos.move(fromOffsets: fromOffsets, toOffset: toOffset)
+    }  // func move
     
     
     

@@ -27,13 +27,26 @@ struct ToDoListView: View {
                     }  // NavigationLink
                     .font(.title2)
                 }  // ForEach
-
-                
+// Traditional Calls
+//                .onDelete { indexSet in
+//                    toDosVM.delete(indexSet: indexSet)
+//                }  // .onDelete
+//                .onMove { fromOffsets, toOffset in
+//                    toDosVM.move(fromOffsets: fromOffsets, toOffset: toOffset)
+//                }  // .onMove
+//
+// Shorthand Calls to .onDelete & .onMove
+                .onDelete(perform: toDosVM.delete)
+                .onMove(perform: toDosVM.move)
             }  // List
             .navigationTitle("ToDo List")
             .navigationBarTitleDisplayMode(.automatic)
             .listStyle(.plain)
             .toolbar {
+                 ToolbarItem(placement: .navigationBarLeading) {
+                    EditButton()
+                }  // ToolbarItem - plus sign
+                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         sheetIsPresented.toggle()
@@ -41,7 +54,7 @@ struct ToDoListView: View {
                         Image(systemName: "plus")
                     }  // Button
                 }  // ToolbarItem - plus sign
-            }  // .toolbar
+             }  // .toolbar
             .sheet(isPresented: $sheetIsPresented) {
                 NavigationStack {
                     DetailView(toDo: ToDo(), newToDo: true)   // new value
