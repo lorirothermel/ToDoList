@@ -36,8 +36,8 @@ struct ToDoListView: View {
 //                }  // .onMove
 //
 // Shorthand Calls to .onDelete & .onMove
-                .onDelete(perform: toDosVM.delete)
-                .onMove(perform: toDosVM.move)
+                .onDelete(perform: toDosVM.deleteToDo)
+                .onMove(perform: toDosVM.moveToDo)
             }  // List
             .navigationTitle("ToDo List")
             .navigationBarTitleDisplayMode(.automatic)
@@ -57,7 +57,7 @@ struct ToDoListView: View {
              }  // .toolbar
             .sheet(isPresented: $sheetIsPresented) {
                 NavigationStack {
-                    DetailView(toDo: ToDo(), newToDo: true)   // new value
+                    DetailView(toDo: ToDo())   // new value
                 }  // NavigationStack
             }  // .sheet
 //            .fullScreenCover(isPresented: $sheetIsPresented) {
