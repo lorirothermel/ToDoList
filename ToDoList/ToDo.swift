@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ToDo: Identifiable {
+struct ToDo: Identifiable, Codable {
     var id: String?
     var item = ""
     var reminderIsOn = false
