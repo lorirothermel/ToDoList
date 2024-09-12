@@ -6,71 +6,121 @@
 //
 
 import SwiftUI
+import SwiftData
 
-struct ToDoListView: View {
-    @EnvironmentObject var toDosVM: ToDosViewModel
-    @State private var newTodo = ""
-    @State private var sheetIsPresented = false
-    
-    
+enum SortOption: String, CaseIterable {
+    case asEntered = "As Entered"
+    case alphabetical = "A-Z"
+    case chronological = "Date"
+    case completed = "Not Done"
+}  // enum
 
+struct SortedToDoList: View {
+    @Environment(\.modelContext) var modelContext
+    @Query var toDos: [ToDo]
+    let sortSelection: SortOption
+    
+    init(sortSelection: SortOption) {
+        self.sortSelection = sortSelection
+        
+        switch self.sortSelection {
+        case .asEntered:
+            _toDos = Query()
+        case .alphabetical:
+            _toDos = Query(sort: \.item, order: .forward)
+        case .chronological:
+            _toDos = Query(sort: \.dueDate)
+        case .completed:
+            _toDos = Query(filter: #Predicate { $0.isCompleted == false })
+        }  // switch
+    }  // init
     
     var body: some View {
-        NavigationStack {
-            
-            List {
-                ForEach(toDosVM.toDos) { toDo in
-                    NavigationLink {
-                        DetailView(toDo: toDo)
-                    } label: {
-                        Text(toDo.item)
-                    }  // NavigationLink
+        List {
+            ForEach(toDos) { toDo in
+                VStack(alignment: .leading) {
+                    HStack {
+                        Image(systemName: toDo.isCompleted ? "checkmark.rectangle": "rectangle")
+                            .onTapGesture {
+                                toDo.isCompleted.toggle()
+                            }  // .onTapGesture
+                        NavigationLink {
+                            DetailView(toDo: toDo)
+                        } label: {
+                            Text(toDo.item)
+                        }  // NavigationLink
+                        
+                    }  // HStack
                     .font(.title2)
-                }  // ForEach
-// Traditional Calls
-//                .onDelete { indexSet in
-//                    toDosVM.delete(indexSet: indexSet)
-//                }  // .onDelete
-//                .onMove { fromOffsets, toOffset in
-//                    toDosVM.move(fromOffsets: fromOffsets, toOffset: toOffset)
-//                }  // .onMove
-//
-// Shorthand Calls to .onDelete & .onMove
-                .onDelete(perform: toDosVM.deleteToDo)
-                .onMove(perform: toDosVM.moveToDo)
-            }  // List
-            .navigationTitle("ToDo List")
-            .navigationBarTitleDisplayMode(.automatic)
-            .listStyle(.plain)
-            .toolbar {
-                 ToolbarItem(placement: .navigationBarLeading) {
-                    EditButton()
-                }  // ToolbarItem - plus sign
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        sheetIsPresented.toggle()
-                    } label: {
-                        Image(systemName: "plus")
+                    HStack {
+                        Text(toDo.dueDate.formatted(date: .abbreviated, time: .shortened))
+                            .foregroundColor(.secondary)
+                        if (toDo.reminderIsOn) {
+                            Image(systemName: "calendar.badge.clock")
+                                .symbolRenderingMode(.multicolor)
+                        }  // if
+                        
+                    }  // HStack
+                    
+                }  // VStack
+                .swipeActions {
+                    Button("Delete", role: .destructive) {
+                        modelContext.delete(toDo)
                     }  // Button
-                }  // ToolbarItem - plus sign
-             }  // .toolbar
-            .sheet(isPresented: $sheetIsPresented) {
-                NavigationStack {
-                    DetailView(toDo: ToDo())   // new value
-                }  // NavigationStack
-            }  // .sheet
-//            .fullScreenCover(isPresented: $sheetIsPresented) {
-//                DetailView(passedValue: "")
-//            }  // .sheet
+                }  // .swipeActions
+                
+                
+            }  // ForEach
             
+        }  // List
+        .listStyle(.plain)
+        
+    }  // some View
+}  // SortedToDoList
+
+struct ToDoListView: View {
+    @State private var sheetIsPresented = false
+    @State private var sortSelection: SortOption = .asEntered
+        
+    var body: some View {
+        NavigationStack {
+            SortedToDoList(sortSelection: sortSelection)
+                .navigationTitle("To Do List")
+                .navigationBarTitleDisplayMode(.automatic)
+                
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button {
+                            sheetIsPresented.toggle()
+                        } label: {
+                            Image(systemName: "plus")
+                        }  // Button
+                    }  // ToolbarItem - plus
+                
+                    ToolbarItem(placement: .bottomBar) {
+                        Picker("", selection: $sortSelection) {
+                            ForEach(SortOption.allCases, id: \.self) { sortOrder in
+                                Text(sortOrder.rawValue)
+                            }  // ForEach
+                        }  // Picker
+                        .pickerStyle(.segmented)
+                    
+                    }  // ToolbarItem - bottom bar
+                }  // .toolbar
+                .sheet(isPresented: $sheetIsPresented) {
+                    NavigationStack {
+                        DetailView(toDo: ToDo())   // new value
+                    }  // NavigationStack
+                }  // .sheet
             
-        }  // NavigationStack
+            }  // NavigationStack
+        
+        
     }  // some View
     
 }  // ToDoListView
 
 #Preview {
     ToDoListView()
-        .environmentObject(ToDosViewModel())
+        .modelContainer(for: ToDo.self)
 }
